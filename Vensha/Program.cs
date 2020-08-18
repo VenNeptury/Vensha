@@ -1,12 +1,10 @@
-﻿using System;
+﻿using Vensha.Services;
+using System.Threading.Tasks;
 
 namespace Vensha
 {
-    class Program
+    internal sealed class Program
     {
-        static void Main(string[] args)
-        {
-            Console.WriteLine("Hello World!");
-        }
+        static Task Main(string[] args) => new DiscordService().InitializeAsync();
     }
 }

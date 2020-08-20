@@ -1,27 +1,29 @@
 using System;
+using System.Threading.Tasks;
 using Discord;
 
 namespace Vensha.Services {
     public static class Logging {
         private static LogSeverity logLevel = LogSeverity.Info;
-        public static void Log (string source, LogSeverity severity, string message, Exception error = null) {
+        public static async Task Log (string source, LogSeverity severity, string message, Exception error = null) {
             if (severity > logLevel) return;
 
-            AppendMessage ((ConsoleColor) (-1), DateTime.Now.ToLongTimeString () + ' ');
+            await AppendMessage ((ConsoleColor) (-1), DateTime.Now.ToLongTimeString () + ' ');
 
-            AppendMessage (GetColour (severity), $"[{source}] ");
+            await AppendMessage (GetColour (severity), $"[{source}] ");
 
-            if (!String.IsNullOrEmpty (message)) AppendMessage (ConsoleColor.White, message + ' ');
-            else if (error != null && !String.IsNullOrEmpty (error.Message)) AppendMessage (ConsoleColor.Red, error.Message);
+            if (!String.IsNullOrEmpty (message)) await AppendMessage (ConsoleColor.White, message + ' ');
+            else if (error != null && !String.IsNullOrEmpty (error.Message)) await AppendMessage (ConsoleColor.Red, error.Message);
 
             Console.WriteLine ();
         }
-        public static void Log (LogMessage msg) => Log (msg.Source, msg.Severity, msg.Message, msg.Exception);
+        public static Task Log (LogMessage msg) => Log (msg.Source, msg.Severity, msg.Message, msg.Exception);
 
-        private static void AppendMessage (ConsoleColor color, string message) {
+        private static Task AppendMessage (ConsoleColor color, string message) {
             Console.ForegroundColor = color;
             Console.Write (message);
             Console.ResetColor ();
+            return Task.CompletedTask;
         }
 
         private static ConsoleColor GetColour (LogSeverity severity) {

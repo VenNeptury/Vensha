@@ -1,9 +1,11 @@
 using System;
 using System.Reflection;
 using System.Threading.Tasks;
+using Discord;
 using Discord.WebSocket;
 using Discord.Commands;
 using Microsoft.Extensions.DependencyInjection;
+using Vensha.Services;
 
 namespace Vensha.Handlers
 {
@@ -20,6 +22,7 @@ namespace Vensha.Handlers
             _client = services.GetRequiredService<DiscordSocketClient>();
 
             _client.MessageReceived += HandleCommands;
+            _commands.Log += Logging.Log;
         }
 
         public Task Initialise() => _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
@@ -33,8 +36,10 @@ namespace Vensha.Handlers
 
             var context = new CommandContext(_client, message);
 
-            var result = _commands.ExecuteAsync(context, argPos, _services, MultiMatchHandling.Best);
-            Console.WriteLine((await result).ErrorReason);
+            var result = await _commands.ExecuteAsync(context, argPos, _services, MultiMatchHandling.Best);
+
+            if (!result.IsSuccess && result.ErrorReason != "Unknown command.") await Logging.Log("CommandHandler", LogSeverity.Error, result.ErrorReason);
+            else if (result.IsSuccess) await Logging.Log("CommandHandler", LogSeverity.Debug, $"Command successfully executed: {message.Content.Substring(0, Math.Min(20, message.Content.Length))}");
         }
     }
 }

@@ -2,32 +2,37 @@ using System;
 using System.Threading.Tasks;
 using Discord;
 
-namespace Vensha.Services {
-    public static class Logging {
-        private static LogSeverity logLevel = LogSeverity.Info;
-        public static async Task Log (string source, LogSeverity severity, string message, Exception error = null) {
+namespace Vensha.Services
+{
+    public static class Logging
+    {
+        private static LogSeverity logLevel = LogSeverity.Debug;
+        public static async Task Log(string source, LogSeverity severity, string message, Exception error = null)
+        {
             if (severity > logLevel) return;
+            await AppendMessage((ConsoleColor)(-1), DateTime.Now.ToLongTimeString() + ' ');
 
-            await AppendMessage ((ConsoleColor) (-1), DateTime.Now.ToLongTimeString () + ' ');
+            await AppendMessage(GetColour(severity), $"[{source}] ");
 
-            await AppendMessage (GetColour (severity), $"[{source}] ");
+            if (!String.IsNullOrEmpty(message)) await AppendMessage(ConsoleColor.White, message + ' ');
+            else if (error != null && !String.IsNullOrEmpty(error.Message)) await AppendMessage(ConsoleColor.Red, error.Message);
 
-            if (!String.IsNullOrEmpty (message)) await AppendMessage (ConsoleColor.White, message + ' ');
-            else if (error != null && !String.IsNullOrEmpty (error.Message)) await AppendMessage (ConsoleColor.Red, error.Message);
-
-            Console.WriteLine ();
+            Console.WriteLine();
         }
-        public static Task Log (LogMessage msg) => Log (msg.Source, msg.Severity, msg.Message, msg.Exception);
+        public static Task Log(LogMessage msg) => Log(msg.Source, msg.Severity, msg.Message, msg.Exception);
 
-        private static Task AppendMessage (ConsoleColor color, string message) {
+        private static Task AppendMessage(ConsoleColor color, string message)
+        {
             Console.ForegroundColor = color;
-            Console.Write (message);
-            Console.ResetColor ();
+            Console.Write(message);
+            Console.ResetColor();
             return Task.CompletedTask;
         }
 
-        private static ConsoleColor GetColour (LogSeverity severity) {
-            switch (severity) {
+        private static ConsoleColor GetColour(LogSeverity severity)
+        {
+            switch (severity)
+            {
                 case LogSeverity.Critical:
                     return ConsoleColor.Red;
                 case LogSeverity.Error:
